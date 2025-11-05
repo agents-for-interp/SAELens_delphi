@@ -1,7 +1,8 @@
 # Standard imports
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"  
-os.environ["RAYON_NUM_THREADS"] = "1" # Add this line
+os.environ["RAYON_NUM_THREADS"] = "2" # Add this line
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 import torch
 from tqdm import tqdm
@@ -18,6 +19,14 @@ print(f"Device: {device}")
 from datasets import load_dataset
 from transformer_lens import HookedTransformer
 from sae_lens import SAE
+
+# Clear GPU cache
+if torch.cuda.is_available():
+    torch.cuda.empty_cache()
+
+# Force garbage collection
+import gc
+gc.collect()
 
 hook_name = "blocks.5.hook_resid_pre"
 model = HookedTransformer.from_pretrained("pythia-70m-deduped", device=device)
@@ -43,7 +52,7 @@ token_dataset = tokenize_and_concatenate(
     dataset=dataset,  # type: ignore
     tokenizer=model.tokenizer,  # type: ignore
     streaming=True,
-    max_length=sae.cfg.metadata.context_size,
+    max_length=50, #sae.cfg.metadata.context_size,
     add_bos_token=sae.cfg.metadata.prepend_bos,
 )
 

@@ -1093,7 +1093,7 @@ def get_sparsify_config_from_disk(
         "architecture": "standard",
         "d_in": old_cfg_dict["d_in"],
         "d_sae": d_sae,
-        "dtype": "bfloat16",
+        "dtype": "float32",
         "device": device or "cpu",
         "model_name": config_dict.get("model", path.parts[-2]),
         "hook_name": hook_name,
@@ -1130,12 +1130,19 @@ def sparsify_huggingface_loader(
     force_download: bool = False,
     cfg_overrides: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, torch.Tensor], None]:
+    cfg_filename = f"{folder_name}/{SAE_CFG_FILENAME}"
+    cfg_path = hf_hub_download(
+        repo_id,
+        filename=cfg_filename,
+        force_download=force_download,
+    )
     weights_filename = f"{folder_name}/{SPARSIFY_WEIGHTS_FILENAME}"
     sae_path = hf_hub_download(
         repo_id,
         filename=weights_filename,
         force_download=force_download,
     )
+    cfg_overrides = {"dtype": "float32"}
     cfg_dict, state_dict = sparsify_disk_loader(
         Path(sae_path).parent, device=device, cfg_overrides=cfg_overrides
     )
@@ -1161,9 +1168,9 @@ def sparsify_disk_loader(
     ).to(dtype)
 
     if "W_dec" in state_dict_loaded:
-        W_dec = state_dict_loaded["W_dec"].T.to(dtype)
+        W_dec = state_dict_loaded["W_dec"].to(dtype)
     else:
-        W_dec = state_dict_loaded["decoder.weight"].T.to(dtype)
+        W_dec = state_dict_loaded["decoder.weight"].to(dtype)
 
     if "b_enc" in state_dict_loaded:
         b_enc = state_dict_loaded["b_enc"].to(dtype)

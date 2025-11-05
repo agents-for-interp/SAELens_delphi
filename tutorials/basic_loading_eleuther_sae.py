@@ -1,5 +1,8 @@
 # Standard imports
 import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"  
+os.environ["RAYON_NUM_THREADS"] = "1" # Add this line
+
 import torch
 from tqdm import tqdm
 import plotly.express as px
@@ -16,14 +19,14 @@ from datasets import load_dataset
 from transformer_lens import HookedTransformer
 from sae_lens import SAE
 
-hook_name = "blocks.3.hook_resid_post__trainer_12"
+hook_name = "blocks.5.hook_resid_pre"
 model = HookedTransformer.from_pretrained("pythia-70m-deduped", device=device)
 
 # the cfg dict is returned alongside the SAE since it may contain useful information for analysing the SAE (eg: instantiating an activation store)
 # Note that this is not the same as the SAEs config dict, rather it is whatever was in the HF repo, from which we can extract the SAE config dict
 # We also return the feature sparsities which are stored in HF for convenience.
 sae = SAE.from_pretrained(
-    release="sae_bench_pythia70m_sweep_gated_ctx128_0730",  # see other options in sae_lens/pretrained_saes.yaml
+    release="sae-pythia70-deduped-eai",  # see other options in sae_lens/pretrained_saes.yaml
     sae_id=hook_name,  # won't always be a hook point
     device=device,
 )
@@ -71,5 +74,15 @@ visualization_data_gpt = SaeVisRunner(
 
 from sae_dashboard.data_writing_fns import save_feature_centric_vis
 
-filename = f"demo_feature_dashboards.html"
+filename = f"sae_pythia70_deduped_eai_feature_dashboards.html"
 save_feature_centric_vis(sae_vis_data=visualization_data_gpt, filename=filename)
+
+del model, sae, dataset, token_dataset
+
+# Clear GPU cache
+if torch.cuda.is_available():
+    torch.cuda.empty_cache()
+
+# Force garbage collection
+import gc
+gc.collect()

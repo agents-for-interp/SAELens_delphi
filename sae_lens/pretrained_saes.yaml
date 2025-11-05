@@ -11146,6 +11146,20 @@ pythia-70m-deduped-res-sm:
   - id: blocks.5.hook_resid_post
     neuronpedia: pythia-70m-deduped/5-res-sm
     path: 5-res-sm
+sae-pythia70-deduped-eai:
+  conversion_func: sparsify
+  links:
+    dashboards: null
+    model: https://huggingface.co/EleutherAI/pythia-70m-deduped
+  model: pythia-70m-deduped
+  repo_id: EleutherAI/sae-pythia-70m-deduped-32k
+  saes:
+  - id: blocks.5.hook_resid_pre
+    neuronpedia: null
+    path: layers.5.mlp
+  - id: blocks.5.hook_resid_post
+    neuronpedia: null
+    path: layers.5.mlp
 sae_bench_gemma-2-2b_topk_width-2pow12_date-1109:
   conversion_func: dictionary_learning_1
   links:

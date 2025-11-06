@@ -2,7 +2,8 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"  
 os.environ["RAYON_NUM_THREADS"] = "2" # Add this line
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+# os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+os.environ["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
 
 import torch
 from tqdm import tqdm

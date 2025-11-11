@@ -7,8 +7,9 @@ os.environ["PYTORCH_ALLOC_CONF"] = "expandable_segments:True"
 
 import torch
 from tqdm import tqdm
+import pandas as pd
 import plotly.express as px
-# torch.set_grad_enabed(False)
+torch.set_grad_enabled(False)
 
 if torch.backends.mps.is_available():
     device = "mps"
@@ -46,22 +47,23 @@ from transformer_lens.utils import tokenize_and_concatenate
 
 dataset = load_dataset(
     # path="monology/pile-ughted",
-    path="NeelNanda/pile-10k",
+    # path="NeelNanda/pile-10k",
+    path="JeanKaddour/minipile",
     split="train",
-    streaming=True,
+    streaming=False,
 )
 
 token_dataset = tokenize_and_concatenate(
     dataset=dataset,  # type: ignore
     tokenizer=model.tokenizer,  # type: ignore
     streaming=True,
-    max_length=50, #sae.cfg.metadata.context_size,
+    max_length=sae.cfg.metadata.context_size,
     add_bos_token=sae.cfg.metadata.prepend_bos,
 )
 
 
 ## running dashboard:
-test_feature_idx_gpt = list(range(10)) #+ [1000]
+test_feature_idx_gpt = list(range(50)) #+ [1000]
 
 from sae_dashboard.sae_vis_data import SaeVisConfig
 from sae_dashboard.sae_vis_runner import SaeVisRunner
@@ -71,7 +73,7 @@ feature_vis_config_gpt = SaeVisConfig(
     hook_point=hook_name,
     features=test_feature_idx_gpt,
     minibatch_size_features=64,
-    minibatch_size_tokens=128, #256
+    minibatch_size_tokens=256,
     verbose=True,
     device=device,
 )

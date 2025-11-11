@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "internalConsole",
             "internalConsoleOptions": "openOnSessionStart",
-            "justMyCode": true
+            "justMyCode": false
         },
     ]
 }
